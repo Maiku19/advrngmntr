@@ -68,7 +68,14 @@ function log_internal(msg: string, logLevel: LogLevel)
   const logOutput = `[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}\n`;
 
   fs.appendFileSync(latestLog, logOutput);
-  console.log(logOutput);
+
+  // idk if i like this or not
+  const logFunction =
+    logLevel == LogLevel.INFO ? console.log :
+      logLevel == LogLevel.WARNING ? console.warn :
+        console.error;
+
+  logFunction(logOutput);
 }
 
 // I hope I did this correctly OmO
@@ -102,4 +109,9 @@ export function logOnFatalErr<T>(call: (...args: any) => T): T
 
     throw err;
   }
+}
+
+export function archiveLog()
+{
+
 }

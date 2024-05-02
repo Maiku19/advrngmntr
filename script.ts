@@ -3,8 +3,14 @@ import { Location, RingApi } from "ring-client-api";
 import { handleDeviceEvent, handleLocationConnect, handleOnDoorbellPressed, handleOnMotionDetected, handleRefreshTokenUpdate } from "./handlers";
 import { logOnFatalErr, init as loggerInit, logInfo } from "./logger";
 import { getFlag } from "./argutil";
+import * as readline from "readline";
+import { handleCommand } from "./command-handler";
 
 // im acctualy enjoying the TS syntax, considering it's just JS with types :P
+
+// START OF PROGRAM
+
+let ringApi: RingApi;
 let autoRestart: boolean = getFlag("a", "auto-restart");
 
 loggerInit();
@@ -14,8 +20,20 @@ do
 {
   try
   {
-    logOnFatalErr(run);
-    logInfo("[Run: EXIT]");
+    logOnFatalErr(setup);
+    logInfo("[Setup: EXIT]");
+
+    const rl = readline.createInterface
+      ({
+        input: process.stdin,
+        output: process.stdout
+      });
+
+    let exit: boolean = false;
+    do
+    {
+      rl.question("advrngmntr cmd> ", async (cmd) => { exit = await handleCommand(cmd, ringApi).finally(); });
+    } while (!exit);
   }
   catch (error)
   {
@@ -24,15 +42,18 @@ do
   }
 } while (autoRestart);
 
+
 logInfo("[PROGRAM: END]");
 
+// END OF PROGRAM
 
-async function run() 
+
+async function setup() 
 {
   const { env } = process;
 
   logInfo("Staring API");
-  const ringApi = new RingApi
+  ringApi = new RingApi
     ({
       refreshToken: env.RING_REFRESH_TOKEN!,
     });

@@ -58,13 +58,14 @@ export async function handleOnMotionDetected(camera: RingCamera, value: boolean)
 
         ensurePath(recordingsDir);
 
-        const filename = `motion_${recordingsDir}/${formatDateFs(new Date(Date.now()))}.mp4`;
-        logInfo(`${camera.name} (${camera.id}) Reason: motion detected | recording started (${filename})`);
+        const filename = `motion_${formatDateFs(new Date(Date.now()))}.mp4`;
+        const filepath = `${recordingsDir}/${filename}`;
+        logInfo(`${camera.name} (${camera.id}) Reason: motion detected | recording started (${filepath})`);
 
 
         // TODO: find a way to record as long as motion is detected
         // TODO: record audio
-        camera.recordToFile(filename, 30);
+        camera.recordToFile(filepath, 30);
     });
 }
 
@@ -80,11 +81,12 @@ export async function handleOnDoorbellPressed(doorbell: RingCamera, event: PushN
 
         ensurePath(recordingsDir);
 
-        const filename = `doorbellPressed_${recordingsDir}/${formatDateFs(new Date(Date.now()))}.mp4`;
-        logInfo(`${doorbell.name} (${doorbell.id}) Reason: doorbell pressed | recording started (${filename})`);
+        const filename = `doorbellPressed_${formatDateFs(new Date(Date.now()))}.mp4`;
+        const filepath = `${recordingsDir}/${filename}`;
+        logInfo(`${doorbell.name} (${doorbell.id}) Reason: doorbell pressed | recording started (${filepath})`);
 
         // TODO: find a way to record as long as motion is detected
         // TODO: record audio
-        doorbell.recordToFile(filename, 120);
+        doorbell.recordToFile(filepath, 120);
     });
 }
