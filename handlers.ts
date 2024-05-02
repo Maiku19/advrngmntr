@@ -4,7 +4,7 @@ import { logOnErr, logInfo } from "./logger";
 import { Location, NotificationDetectionType, PushNotificationDing, RingCamera } from "ring-client-api";
 import { recordingsDir } from "./consts";
 import { existsSync, mkdirSync } from "fs";
-import { ensurePath } from "./util";
+import { ensurePath, formatDateFs } from "./util";
 
 export async function handleRefreshTokenUpdate(value: { oldRefreshToken?: string | undefined, newRefreshToken: string; }) 
 {
@@ -49,10 +49,17 @@ export async function handleDeviceEvent(device: RingCamera, event: PushNotificat
 
 export async function handleOnMotionDetected(camera: RingCamera, value: boolean)
 {
+    if (!value)
+    {
+        logInfo(`${camera.name} (${camera.id}): motion: ${value}`);
+        return;
+    }
+
     ensurePath(recordingsDir);
 
-    const filename = `${recordingsDir}/${new Date().getUTCSeconds()}.mp4`;
-    logInfo(`${camera.name} (${camera.id}): recording started (${filename})\n  value: ${value}`);
+    const filename = `${recordingsDir}/${formatDateFs(new Date(Date.now()))}.mp4`;
+    logInfo(`${camera.name} (${camera.id}): recording started (${filename})`);
 
+    // TODO: find a way to record as long as motion is detected 
     camera.recordToFile(filename, 30);
 }
