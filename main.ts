@@ -1,63 +1,42 @@
 import "dotenv/config";
 import { Location, RingApi } from "ring-client-api";
 import { handleDeviceEvent, handleLocationConnect, handleOnDoorbellPressed, handleOnMotionDetected, handleRefreshTokenUpdate } from "./handlers";
-import { logOnFatalErr, init as loggerInit, logInfo } from "./logger";
-import { getFlag } from "./argutil";
+import { logOnFatalErr, init as loggerInit, logInfo, archiveLog } from "./logger";
 import * as readline from "readline";
 import { handleCommand } from "./command-handler";
 
 // im actually enjoying the TS syntax, considering it's just JS with types :P
 
 // START OF PROGRAM
-
-let ringApi: RingApi;
-let autoRestart: boolean = getFlag("a", "auto-restart");
-
 loggerInit();
 logInfo("[PROGRAM: START]");
 
-do
+try
 {
-  try
-  {
-    logOnFatalErr(setup);
-    logInfo("[Setup: EXIT]");
-
-    const rl = readline.createInterface
-      ({
-        input: process.stdin,
-        output: process.stdout
-      });
-
-    let exit: boolean = false;
-    do
-    {
-      rl.question("advrngmntr cmd> ", async (cmd) => { exit = await handleCommand(cmd, ringApi).finally(); });
-    } while (!exit);
-  }
-  catch (error)
-  {
-    if (autoRestart) { logInfo("[PROGRAM: RESTART]"); logInfo("Restarting after fatal error"); }
-    else { logInfo("Terminating after fatal error"); }
-  }
-} while (autoRestart);
-
-
-logInfo("[PROGRAM: END]");
-
-// END OF PROGRAM
-
-
-async function setup() 
-{
-  const { env } = process;
-
   logInfo("Staring API");
-  ringApi = new RingApi
+  const ringApi = new RingApi
     ({
-      refreshToken: env.RING_REFRESH_TOKEN!,
+      refreshToken: process.env.RING_REFRESH_TOKEN!,
     });
 
+  logOnFatalErr(() => setup(ringApi, () =>
+  {
+    logInfo("[Setup: EXIT]");
+
+    promptCmd(ringApi); // <- END OF PROGRAM
+  }));
+}
+catch (error)
+{
+  logInfo(`Terminating due to fatal error: ${error}`);
+  archiveLog();
+  logInfo("[PROGRAM: TERMINATE]");
+  process.exit(-1);
+}
+
+
+async function setup(ringApi: RingApi, callback?: () => void) 
+{
   logInfo("Subscribing to onRefreshTokenUpdated");
   ringApi.onRefreshTokenUpdated.subscribe(handleRefreshTokenUpdate);
 
@@ -98,6 +77,20 @@ async function setup()
   }
 
   logInfo("[LISTEN: START]");
+
+  if (callback != null) { callback(); }
+}
+
+// imma just use recursion cuz idk how to get a sync version on readline ToT
+async function promptCmd(ringApi: RingApi, rl?: readline.Interface,)
+{
+  rl ??= readline.createInterface
+    ({
+      input: process.stdin,
+      output: process.stdout
+    });
+  rl.question("cmd>", async (answer) => { if (await handleCommand(answer, ringApi)) { logInfo("[PROGRAM: END]"); process.exit(0); } promptCmd(ringApi, rl); });
+  // END OF PROGRAM
 }
 
 async function logDevices(locations: Location[]) 
