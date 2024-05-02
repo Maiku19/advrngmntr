@@ -10,6 +10,8 @@
         "typescript": "^5.4.5"
     },
     "scripts": {
-        "start": "tsc && node ./jsout/main.js"
+        "start": "tsc && node ./jsout/main.js",
+        "start-dont-build": "node ./jsout/main.js",
+        "auth": "node ./node_modules/ring-client-api/lib/ring-auth-cli.js"
     }
 }
