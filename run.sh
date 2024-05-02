@@ -72,8 +72,8 @@ fi
 git branch
 if [[ $? -ne "0" ]]; then
   if [[ "${dir}/${name}" -ef $0 ]]; then
-    cp $0 $TMP/$name
-    exec $SHELL $TMP/$name $@
+    cp $0 ${TMP}/${name}
+    ${TMP}/${name} $@
     exit 0
   fi
   mv "${dir}/${name}" "${dir}/${name}"
@@ -91,18 +91,13 @@ if [[ $? -ne "0" ]]; then
   fi
 
   npm i
-  "$dir/$name @$"
+  exec "$dir/run.sh @$"
   exit 0
 elif [[ $update == 1 ]]; then
   cp $(basename $0) $TMP/$name
-  exec $SHELL $TMP/$name -a $a -d $dir -u
+  exec "$TMP/$name -a $a -d $dir -u"
   exit 0
 else
-  mv "${TMP}/${name}" "${TMP}/${name}"
-  if [[ $? == "0" ]]; then
-    rm "${TMP}/${name}"
-  fi
-
   git fetch
   echo "if you want to update run: './run.sh -u' or 'git pull'"
 fi
