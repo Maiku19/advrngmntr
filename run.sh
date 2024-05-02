@@ -3,7 +3,7 @@
 # im not sure why im doing this as it probably wont ever work, but i just want to have some fun
 
 a="x64"
-dir="./"
+dir=`pwd`
 update=0
 name="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 
@@ -71,26 +71,38 @@ fi
 
 git branch
 if [[ $? -ne "0" ]]; then
-  if [[ "$dir/$name" -ef $0 ]]; then
+  if [[ "${dir}/${name}" -ef $0 ]]; then
     cp $0 $TMP/$name
-    start ./tmp/$name $@
+    exec $SHELL $TMP/$name $@
     exit 0
   fi
+  mv "${dir}/${name}" "${dir}/${name}"
+  if [[ $? == "0" ]]; then
+    rm "${dir}/${name}"
+  fi
+
   echo "source files not found, cloning..."
-  git clone https://github.com/Maiku19/ring-api-test.git $dir --branch=latest-stable
+  git clone https://github.com/Maiku19/advrngmntr.git $dir --branch=latest-stable
   if [[ $? -ne "0" ]]; then
     echo "fatal error: failed to clone repo"
-    echo "try again with administrator privilege or clone it manualy: https://github.com/Maiku19/ring-api-test"
+    echo "try again with administrator privilege or clone it manualy: https://github.com/Maiku19/advrngmntr"
     read -p "press any key to exit..."
     exit 6
   fi
 
   npm i
+  "$dir/$name @$"
+  exit 0
 elif [[ $update == 1 ]]; then
-  cp $0 $TMP/$name
-  start ./tmp/$name -a $a -d $dir -u
+  cp $(basename $0) $TMP/$name
+  exec $SHELL $TMP/$name -a $a -d $dir -u
   exit 0
 else
+  mv "${TMP}/${name}" "${TMP}/${name}"
+  if [[ $? == "0" ]]; then
+    rm "${TMP}/${name}"
+  fi
+
   git fetch
   echo "if you want to update run: './run.sh -u' or 'git pull'"
 fi
