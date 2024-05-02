@@ -59,13 +59,13 @@ if [[ $? -ne "0" ]]; then
   fi
 fi
 
-git branch
+git pull
 if [[ $? -ne "0" ]]; then
 
   cd ./advrngmntr
   if [[ $? -ne "0" ]]; then
     echo "source files not found, cloning..."
-    git clone https://github.com/Maiku19/ring-api-test.git ./advrngmntr
+    git clone https://github.com/Maiku19/ring-api-test.git ./advrngmntr --branch=latest-stable
     if [[ $? -ne "0" ]]; then
       echo "fatal error: failed to clone repo"
       echo "try again with administrator privilege or clone it manualy: https://github.com/Maiku19/ring-api-test"
@@ -87,7 +87,7 @@ if [[ $? != "0" ]]; then
     echo "fatal error: failed to install typescript"
     echo "try again with administrator privilege or install it manualy: https://www.typescriptlang.org/download/"
     read -p "press any key to exit..."
-    exit 9
+    exit 7
   fi
 fi
 
