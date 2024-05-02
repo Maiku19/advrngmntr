@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Location, RingApi } from "ring-client-api";
-import { handleDeviceEvent, handleLocationConnect, handleRefreshTokenUpdate } from "./handlers";
+import { handleDeviceEvent, handleLocationConnect, handleOnMotionDetected, handleRefreshTokenUpdate } from "./handlers";
 import { logOnFatalErr, init as loggerInit, logInfo } from "./logger";
 import { getFlag } from "./argutil";
 
@@ -62,6 +62,12 @@ async function run()
   for (const camera of allCameras)
   {
     camera.onNewNotification.subscribe((event) => handleDeviceEvent(camera, event));
+  }
+
+  logInfo("Subscribing to camera.onMotionDetected");
+  for (const camera of allCameras)
+  {
+    camera.onMotionDetected.subscribe((val) => handleOnMotionDetected(camera, val));
   }
 
   logInfo("[LISTEN: START]");

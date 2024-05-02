@@ -44,31 +44,15 @@ export async function handleDeviceEvent(device: RingCamera, event: PushNotificat
                 HumanDetected: ${event.ding.human_detected}\n
                 Subtype: ${event.subtype}\n
             [DeviceEvent: END]`);
-
-        if (event.ding.detection_type == NotificationDetectionType.Motion)
-        {
-            onCameraDetectMotion(device);
-        }
-
-        const eventString =
-            event.ding.detection_type === "motion"
-                ? "Motion detected"
-                : event.subtype === "ding"
-                    ? "Doorbell pressed"
-                    : `Video started (${event.subtype})`;
-
-        logInfo(
-            `${event.ding.device_name} ${eventString}. Ding id: ${event.ding.id}`
-        );
     });
 }
 
-async function onCameraDetectMotion(camera: RingCamera)
+export async function handleOnMotionDetected(camera: RingCamera, value: boolean)
 {
     ensurePath(recordingsDir);
 
     const filename = `${recordingsDir}/${new Date().getUTCSeconds()}.mp4`;
-    logInfo(`${camera.name} (${camera.id}): recording started (${filename})`);
+    logInfo(`${camera.name} (${camera.id}): recording started (${filename})\n  value: ${value}`);
 
     camera.recordToFile(filename, 30);
 }
