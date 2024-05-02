@@ -3,6 +3,8 @@ import { promisify } from "util";
 import { logOnErr, logInfo } from "./logger";
 import { Location, NotificationDetectionType, PushNotificationDing, RingCamera } from "ring-client-api";
 import { recordingsDir } from "./consts";
+import { existsSync, mkdirSync } from "fs";
+import { ensurePath } from "./util";
 
 export async function handleRefreshTokenUpdate(value: { oldRefreshToken?: string | undefined, newRefreshToken: string; }) 
 {
@@ -63,5 +65,10 @@ export async function handleDeviceEvent(device: RingCamera, event: PushNotificat
 
 async function onCameraDetectMotion(camera: RingCamera)
 {
-    camera.recordToFile(`${recordingsDir}/${new Date().getUTCSeconds()}.mp4`, 30);
+    ensurePath(recordingsDir);
+
+    const filename = `${recordingsDir}/${new Date().getUTCSeconds()}.mp4`;
+    logInfo(`${camera.name} (${camera.id}): recording started (${filename})`);
+
+    camera.recordToFile(filename, 30);
 }

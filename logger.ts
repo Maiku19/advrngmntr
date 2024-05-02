@@ -1,6 +1,7 @@
 import fs from "fs";
-import { latestLog, logDir } from "./consts";
+import { latestLog, logDir, oldLogDir } from "./consts";
 import { Expression, StructuredType, Type } from "typescript";
+import { ensurePath, formatDate, formatDateFs } from "./util";
 
 // probably should've put this in a class instead of making everything a function ¯\_(OwO)_/¯
 
@@ -75,8 +76,10 @@ export function log(msg: string, logLevel: LogLevel)
 
 function log_internal(msg: string, logLevel: LogLevel)
 {
-  fs.appendFileSync(latestLog, `[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}\n`);
-  console.log(`[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}`);
+  const logOutput = `[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}\n`;
+
+  fs.appendFileSync(latestLog, logOutput);
+  console.log(logOutput);
 }
 
 // I hope I did this correctly OmO
@@ -110,9 +113,4 @@ export function logOnFatalErr<T>(call: (...args: any) => T): T
 
     throw err;
   }
-}
-
-function formatDate(date: Date): string
-{
-  return `${date.getUTCFullYear()}-${date.getUTCMonth().toString().padStart(2, "0")}-${date.getUTCDay().toString().padStart(2, "0")} ${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}`;
 }
