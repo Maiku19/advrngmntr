@@ -5,11 +5,11 @@ This is a [Ring](https://ring.com) home monitor for ppl who are somehow broke en
 
 ## Installation:
 - #### curl:
-  propably the easiest and fastest installation
+  probably the easiest and fastest installation
   ``` bash
-    cd /your/desired/directory/
-    curl https://github.com/Maiku19/advrngmntr/releases/latest/download/advrngmntr.sh -o installer.sh
-    ./installer.sh
+  cd /your/desired/directory/
+  curl https://github.com/Maiku19/advrngmntr/releases/latest/download/advrngmntr.sh -o installer.sh
+  ./installer.sh
   ```
 - #### git clone:
   ``` bash

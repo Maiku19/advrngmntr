@@ -1,9 +1,8 @@
 import { readFile, writeFile } from "fs";
 import { promisify } from "util";
 import { logOnErr, logInfo } from "./logger";
-import { Location, NotificationDetectionType, PushNotificationDing, RingCamera } from "ring-client-api";
+import { Location, PushNotificationDing, RingCamera } from "ring-client-api";
 import { recordingsDir } from "./consts";
-import { existsSync, mkdirSync } from "fs";
 import { ensurePath, formatDateFs } from "./util";
 
 export async function handleRefreshTokenUpdate(value: { oldRefreshToken?: string | undefined, newRefreshToken: string; }) 
@@ -86,7 +85,6 @@ export async function handleOnDoorbellPressed(doorbell: RingCamera, event: PushN
         logInfo(`${doorbell.name} (${doorbell.id}) Reason: doorbell pressed | recording started (${filepath})`);
 
         // TODO: find a way to record as long as motion is detected
-        // TODO: record audio
         doorbell.recordToFile(filepath, 120);
     });
 }

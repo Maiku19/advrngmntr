@@ -6,7 +6,7 @@ import { getFlag } from "./argutil";
 import * as readline from "readline";
 import { handleCommand } from "./command-handler";
 
-// im acctualy enjoying the TS syntax, considering it's just JS with types :P
+// im actually enjoying the TS syntax, considering it's just JS with types :P
 
 // START OF PROGRAM
 
