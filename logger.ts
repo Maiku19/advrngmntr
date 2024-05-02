@@ -75,7 +75,7 @@ export function log(msg: string, logLevel: LogLevel)
 
 function log_internal(msg: string, logLevel: LogLevel)
 {
-  fs.writeFileSync(latestLog, `[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}\n`);
+  fs.appendFileSync(latestLog, `[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}\n`);
   console.log(`[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}`);
 }
 
