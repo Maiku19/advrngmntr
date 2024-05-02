@@ -1,6 +1,6 @@
 {
     "name": "ring-api-test",
-    "version": "0.2.0-dev",
+    "version": "0.3.1-dev",
     "private": true,
     "dependencies": {
         "dotenv": "^16.3.1",
