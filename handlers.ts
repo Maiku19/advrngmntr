@@ -35,15 +35,14 @@ export async function handleDeviceEvent(device: RingCamera, event: PushNotificat
 {
     logOnErr(async () =>
     {
-        logInfo(
-            `[DeviceEvent: START] \n
-                EventId: ${event.ding.id}\n
-                LocationId: ${event.ding.location_id}\n
-                DeviceName: ${event.ding.device_name}\n
-                MotionType: ${event.ding.detection_type}\n
-                HumanDetected: ${event.ding.human_detected}\n
-                Subtype: ${event.subtype}\n
-            [DeviceEvent: END]`);
+        logInfo(`\n[DeviceEvent: START] 
+  EventId: ${event.ding.id}
+  LocationId: ${event.ding.location_id}
+  DeviceName: ${event.ding.device_name}
+  MotionType: ${event.ding.detection_type}
+  HumanDetected: ${event.ding.human_detected}
+  Subtype: ${event.subtype}
+[DeviceEvent: END]`);
     });
 }
 
@@ -73,11 +72,11 @@ export async function handleOnDoorbellPressed(doorbell: RingCamera, event: PushN
 {
     logOnErr(async () =>
     {
-        logInfo(`[DoorbellPress: START]\n
-          EventId: ${event.ding.id}\n  
-          DoorbellId: ${doorbell.id}\n
-          DoorbellName: ${doorbell.name}\n
-        [DoorbellPress: END]`);
+        logInfo(`\n[DoorbellPress: START]
+  EventId: ${event.ding.id}
+  DoorbellId: ${doorbell.id}
+  DoorbellName: ${doorbell.name}
+[DoorbellPress: END]`);
 
         ensurePath(recordingsDir);
 
