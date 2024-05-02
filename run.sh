@@ -94,6 +94,7 @@ fi
 # check if exists
 mv ./.env ./.env
 if [[ $? -ne "0" ]]; then
+  echo "press crtl-c once if you already have your refresh token"
   node ./node_modules/ring-client-api/lib/ring-auth-cli.js
 
   read -p "RING_REFRESH_TOKEN="
