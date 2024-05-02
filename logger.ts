@@ -25,24 +25,13 @@ export function init()
   if (isInit) { throw new Error("logger is already initialized!"); }
   isInit = true;
 
-  //#region stacktrace
-  // FIXME: 
-  // Error: EINVAL: invalid argument, rename 'C:\Programing\TS\ring-api-test\logs\latest.log' -> 'C:\Programing\TS\ring-api-test\logs\Thu, 02 May 2024 00:02:48 GMT.log' 
-  //   at Object.renameSync(node: fs: 1031: 11)
-  //   at init(C: \Programing\TS\ring - api - test\jsout\logger.js: 28: 22)
-  //   at initCheck(C: \Programing\TS\ring - api - test\jsout\logger.js: 20: 9)
-  //   at log(C: \Programing\TS\ring - api - test\jsout\logger.js: 50: 5)
-  //   at logInfo(C: \Programing\TS\ring - api - test\jsout\logger.js: 34: 5)
-  //   at Object.<anonymous>(C: \Programing\TS\ring - api - test\jsout\script.js: 24: 22)
-  //   at Module._compile(node: internal / modules / cjs / loader: 1376: 14)
-  //   at Module._extensions..js(node: internal / modules / cjs / loader: 1435: 10)
-  //   at Module.load(node: internal / modules / cjs / loader: 1207: 32)
-  //   at Module._load(node: internal / modules / cjs / loader: 1023: 12) {
-  //#endregion
-  // if (fs.existsSync(latestLog))
-  // {
-  //   fs.renameSync(latestLog, `${logDir}/${new Date(Date.now()).toUTCString()}.log`);
-  // }
+  ensurePath(logDir);
+
+  if (fs.existsSync(latestLog))
+  {
+    ensurePath(oldLogDir);
+    fs.renameSync(latestLog, `${oldLogDir}/${formatDateFs(new Date(Date.now()))}.log`);
+  }
 
   log_internal("Logger start", LogLevel.INFO);
 }
