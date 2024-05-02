@@ -1,15 +1,15 @@
 {
     "name": "ring-api-test",
-    "version": "0.0.0-dev",
+    "version": "0.1.0-dev",
     "private": true,
     "dependencies": {
-        "dotenv": "16.3.1",
-        "ring-client-api": "12.1.0",
+        "dotenv": "^16.3.1",
+        "ring-client-api": "^12.1.0",
         "tsc": "^2.0.4",
         "tsconfig": "*",
         "typescript": "^5.4.5"
     },
     "scripts": {
-        "start": "tsc && node ./jsout/script.js"
+        "start": "tsc && node ./jsout/main.js"
     }
 }
