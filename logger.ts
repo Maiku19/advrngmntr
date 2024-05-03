@@ -1,6 +1,5 @@
 import fs from "fs";
 import { latestLog, logDir, oldLogDir } from "./consts";
-import { Expression, StructuredType, Type } from "typescript";
 import { ensurePath, formatDate, formatDateFs } from "./util";
 
 // probably should've put this in a class instead of making everything a function ¯\_(OwO)_/¯
@@ -25,13 +24,7 @@ export function init()
   if (isInit) { throw new Error("logger is already initialized!"); }
   isInit = true;
 
-  ensurePath(logDir);
-
-  if (fs.existsSync(latestLog))
-  {
-    ensurePath(oldLogDir);
-    fs.renameSync(latestLog, `${oldLogDir}/${formatDateFs(new Date(Date.now()))}.log`);
-  }
+  archiveLog();
 
   log_internal("Logger start", LogLevel.INFO);
 }
@@ -65,7 +58,7 @@ export function log(msg: string, logLevel: LogLevel)
 
 function log_internal(msg: string, logLevel: LogLevel)
 {
-  const logOutput = `[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}\n`;
+  const logOutput = `[${formatDate(new Date())}][${LogLevel[logLevel]}] ${msg}\n`;
 
   fs.appendFileSync(latestLog, logOutput);
 
@@ -113,5 +106,11 @@ export function logOnFatalErr<T>(call: (...args: any) => T): T
 
 export function archiveLog()
 {
+  ensurePath(logDir);
 
+  if (fs.existsSync(latestLog))
+  {
+    ensurePath(oldLogDir);
+    fs.renameSync(latestLog, `${oldLogDir}/${formatDateFs(new Date())}.log`);
+  }
 }
