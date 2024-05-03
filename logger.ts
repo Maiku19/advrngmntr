@@ -112,5 +112,11 @@ export function logOnFatalErr<T>(call: (...args: any) => T): T
 
 export function archiveLog()
 {
+  ensurePath(logDir);
 
+  if (fs.existsSync(latestLog))
+  {
+    ensurePath(oldLogDir);
+    fs.renameSync(latestLog, `${oldLogDir}/${formatDateFs(new Date(Date.now()))}.log`);
+  }
 }
