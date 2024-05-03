@@ -1,6 +1,5 @@
 import fs from "fs";
 import { latestLog, logDir, oldLogDir } from "./consts";
-import { Expression, StructuredType, Type } from "typescript";
 import { ensurePath, formatDate, formatDateFs } from "./util";
 
 // probably should've put this in a class instead of making everything a function ¯\_(OwO)_/¯
