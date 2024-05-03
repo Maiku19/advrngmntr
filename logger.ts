@@ -58,7 +58,7 @@ export function log(msg: string, logLevel: LogLevel)
 
 function log_internal(msg: string, logLevel: LogLevel)
 {
-  const logOutput = `[${formatDate(new Date(Date.now()))}][${LogLevel[logLevel]}] ${msg}\n`;
+  const logOutput = `[${formatDate(new Date())}][${LogLevel[logLevel]}] ${msg}\n`;
 
   fs.appendFileSync(latestLog, logOutput);
 
@@ -111,6 +111,6 @@ export function archiveLog()
   if (fs.existsSync(latestLog))
   {
     ensurePath(oldLogDir);
-    fs.renameSync(latestLog, `${oldLogDir}/${formatDateFs(new Date(Date.now()))}.log`);
+    fs.renameSync(latestLog, `${oldLogDir}/${formatDateFs(new Date())}.log`);
   }
 }
