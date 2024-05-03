@@ -24,13 +24,7 @@ export function init()
   if (isInit) { throw new Error("logger is already initialized!"); }
   isInit = true;
 
-  ensurePath(logDir);
-
-  if (fs.existsSync(latestLog))
-  {
-    ensurePath(oldLogDir);
-    fs.renameSync(latestLog, `${oldLogDir}/${formatDateFs(new Date(Date.now()))}.log`);
-  }
+  archiveLog();
 
   log_internal("Logger start", LogLevel.INFO);
 }
