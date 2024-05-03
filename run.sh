@@ -102,9 +102,10 @@ else
   echo "if you want to update run: './run.sh -u' or 'git pull'"
 fi
 
+# shold be installed on `npm i` but imma leave it just incase
 tsc -v
 if [[ $? != "0" ]]; then
-  npm install typescript -g
+  npm install typescript
 
   tsc -v
   if [[ $? != "0" ]]; then 
