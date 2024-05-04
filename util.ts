@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync } from "fs";
 import { Webhook } from "discord-webhook-node";
-import { logError, logInfo } from "./logger";
+import { logError, logInfo, logOnErr } from "./logger";
 import { RingCamera } from "ring-client-api";
 import { recordingsDir } from "./consts";
 
@@ -20,29 +20,46 @@ export function ensurePath(path: string)
   if (!existsSync(path)) { mkdirSync(path); }
 }
 
-export async function webhookSend(path: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!, msg: string = "")
+function createWebhook(webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!): Webhook
 {
-  // TODO: make sure to not get rate limited
   logInfo("[WEBHOOK_SEND: START]");
   const hook = new Webhook(webhookUrl);
 
   hook.setUsername("Advanced (not) Ring Monitor");
   hook.setAvatar("https://yt3.googleusercontent.com/ytc/AIdro_leYAV1c0jVxt2bzEhB3lmqym1uUz15WybpwDufaZ9w7M8=s900-c-k-c0x00ffffff-no-rj");
 
-  try
-  {
-    if (msg != "") { await hook.send(msg); }
-    await hook.sendFile(path);
-  }
-  catch (error) 
-  {
-    if (!(error instanceof Error)) { throw error; }
+  return hook;
+}
 
-    logError(error.message);
-    throw error;
-  }
+export async function webhookMessage(msg: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
+{
+  logOnErr(async () =>
+  {
+    await createWebhook(webhookUrl).send(msg);
+  });
 
-  logInfo("[WEBHOOK_SEND: END]");
+  logInfo("[WEBHOOK_MSG_SEND: END]");
+}
+
+export async function webhookFile(path: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
+{
+  logOnErr(async () =>
+  {
+    await createWebhook(webhookUrl).sendFile(path);
+  });
+
+  logInfo("[WEBHOOK_FILE_SEND: END]");
+}
+
+export async function webhookFileWithContext(path: string, msg: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
+{
+  logOnErr(async () => // I'm pretty sure you can do both with one hook instance but I don't feel like figuring that out .zZ
+  {
+    await createWebhook(webhookUrl).send(msg);
+    await createWebhook(webhookUrl).sendFile(path);
+  });
+
+  logInfo("[WEBHOOK_FILE_W_CONTEXT_SEND: END]");
 }
 
 // TODO: find a way to record as long as motion is detected
@@ -52,12 +69,18 @@ export async function SaveFile(camera: RingCamera, videoCategory: "motion" | "do
 
   const filename = `${videoCategory}_${formatDateFs(new Date())}.mp4`;
   const filepath = `${recordingsDir}/${filename}`;
+
   logInfo(`${camera.name} (${camera.id}) Reason: doorbell pressed | recording started (${filepath})`);
 
+  logInfo("[RECORDING: START]");
+
+  if (sendToWebhook) { webhookMessage(`Wykryto ${videoCategory}! Rozpoczynanie nagrywania (ETA: ${duration}s)`); }
   await camera.recordToFile(filepath, duration);
+
+  logInfo("[RECORDING: END]");
 
   if (sendToWebhook)
   {
-    webhookSend(filename, process.env.DISCORD_WEBHOOK_URL!, `${videoCategory} at formatDate(${new Date()}`);
+    webhookFileWithContext(filename, `${videoCategory} at formatDate(${new Date()}`, process.env.DISCORD_WEBHOOK_URL!);
   }
 }

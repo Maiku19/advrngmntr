@@ -1,7 +1,7 @@
 import { RingApi } from "ring-client-api";
 import { logInfo, logOnErr, logWarning } from "./logger";
 import { existsSync, readdirSync } from "fs";
-import { webhookSend } from "./util";
+import { webhookFile } from "./util";
 import { recordingsDir } from "./consts";
 
 // NOTE: I probably won't add many commands, so this implementation is fine
@@ -75,7 +75,7 @@ async function handleCmd_upld(cmd: string, args: string[], api: RingApi): Promis
     {
       await logOnErr(async () =>
       {
-        await webhookSend(arg); // NOTE: might get rate limited
+        await webhookFile(arg); // NOTE: might get rate limited
       });
     }
     catch (error) 
@@ -110,7 +110,7 @@ async function handleCmd_upldall(cmd: string, args: string[], api: RingApi): Pro
     {
       await logOnErr(async () =>
       {
-        await webhookSend(`${recordingsDir}/${file}`); // NOTE: might get rate limited
+        await webhookFile(`${recordingsDir}/${file}`); // NOTE: might get rate limited
       });
     }
     catch (error) 
