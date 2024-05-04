@@ -1,15 +1,21 @@
 import { RingApi } from "ring-client-api";
-import { logInfo, logWarning } from "./logger";
+import { logInfo, logOnErr, logWarning } from "./logger";
+import { existsSync, readdirSync } from "fs";
+import { webhookSend } from "./util";
+import { recordingsDir } from "./consts";
 
+// NOTE: I probably won't add many commands, so this implementation is fine
 export async function handleCommand(input: string, api: RingApi): Promise<boolean>
 {
   logInfo(`[COMMAND] ${input}`);
 
   const cmd: string = input.trim().toLowerCase().split(" ")[0];
-  const args: string[] = input.split(" ").splice(0, 1);
+  const args: string[] = input.split(" ").splice(1);
 
   if (cmd == "exit") { return true; }
   else if (await handleCmd_dev(cmd, args, api)) { return false; }
+  else if (await handleCmd_upld(cmd, args, api)) { return false; }
+  else if (await handleCmd_upldall(cmd, args, api)) { return false; }
   else { logWarning(`Undefined command: ${input}`); }
 
   return false;
@@ -46,4 +52,79 @@ async function handleCmd_dev(cmd: string, args: string[], api: RingApi): Promise
   logInfo(`[COMMAND_RESPONSE]:\n${out}`);
 
   return true;
-};;
+}
+
+async function handleCmd_upld(cmd: string, args: string[], api: RingApi): Promise<boolean>
+{
+  const cmdId = "upld";
+
+  if (cmd != cmdId) { return false; }
+  if (args.length < 1) { logWarning(`cmd ${cmdId} takes in at least 1 argument but ${args.length} were provided`); }
+
+  let count = 0;
+
+  for (const arg of args)
+  {
+    if (!existsSync(arg))
+    {
+      logWarning(`skipping ${arg}. Reason: File does not exist`);
+      continue;
+    }
+
+    try
+    {
+      await logOnErr(async () =>
+      {
+        await webhookSend(arg); // NOTE: might get rate limited
+      });
+    }
+    catch (error) 
+    {
+      logWarning(`Failed to upload ${arg}`);
+      continue;
+    }
+
+    logInfo(`Uploaded ${arg} successfully`);
+    count++;
+  }
+
+  logInfo(`[COMMAND_RESPONSE]: Successfully uploaded ${count} files`);
+
+  return true;
+}
+
+async function handleCmd_upldall(cmd: string, args: string[], api: RingApi): Promise<boolean>
+{
+  const cmdId = "upldall";
+
+  if (cmd != cmdId) { return false; }
+  if (args.length > 1) { logWarning(`omitting arguments as cmd ${cmdId} takes in 0, ${args.length} were provided`); }
+
+  let count = 0;
+
+  const dir = readdirSync(recordingsDir);
+  for (const file of dir)
+  {
+    logInfo(file);
+    try
+    {
+      await logOnErr(async () =>
+      {
+        await webhookSend(`${recordingsDir}/${file}`); // NOTE: might get rate limited
+      });
+    }
+    catch (error) 
+    {
+      logWarning(`Failed to upload ${file}`);
+      continue;
+    }
+
+    logInfo(`Uploaded ${file} successfully`);
+    count++;
+  }
+
+  logInfo(`[COMMAND_RESPONSE]: Successfully uploaded ${count} files`);
+
+
+  return true;
+}

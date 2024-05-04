@@ -1,8 +1,9 @@
 {
-    "name": "ring-api-test",
-    "version": "0.3.2-dev",
+    "name": "advrngmntr",
+    "version": "0.4.0-dev",
     "private": true,
     "dependencies": {
+        "discord-webhook-node": "^1.1.8",
         "dotenv": "^16.3.1",
         "ring-client-api": "^12.1.0",
         "tsconfig": "*",
