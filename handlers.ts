@@ -2,7 +2,7 @@ import { readFile, writeFile } from "fs";
 import { promisify } from "util";
 import { logOnErr, logInfo } from "./logger";
 import { Location, PushNotificationDing, RingCamera } from "ring-client-api";
-import { SaveFile } from "./util";
+import { record } from "./util";
 
 export async function handleRefreshTokenUpdate(value: { oldRefreshToken?: string | undefined, newRefreshToken: string; }) 
 {
@@ -44,13 +44,9 @@ export async function handleOnMotionDetected(camera: RingCamera, value: boolean)
 {
     logOnErr(async () =>
     {
-        if (!value)
-        {
-            logInfo(`${camera.name} (${camera.id}): motion: ${value}`);
-            return;
-        }
+        if (!value) { return; }
 
-        SaveFile(camera, "motion", 30);
+        record(camera, "motion", 30);
     });
 }
 
@@ -64,6 +60,6 @@ export async function handleOnDoorbellPressed(doorbell: RingCamera, event: PushN
   DoorbellName: ${doorbell.name}
 [handleOnDoorbellPressed: END]`);
 
-        SaveFile(doorbell, "doorbellPressed", 120);
+        record(doorbell, "doorbellPressed", 120);
     });
 }

@@ -53,24 +53,21 @@ export async function webhookFile(path: string, webhookUrl: string = process.env
 
 export async function webhookFileWithContext(path: string, msg: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
 {
-  logOnErr(async () => // I'm pretty sure you can do both with one hook instance but I don't feel like figuring that out .zZ
-  {
-    await createWebhook(webhookUrl).send(msg);
-    await createWebhook(webhookUrl).sendFile(path);
-  });
+  await createWebhook(webhookUrl).send(msg);
+  await createWebhook(webhookUrl).sendFile(path);
 
   logInfo("[WEBHOOK_FILE_W_CONTEXT_SEND: END]");
 }
 
 // TODO: find a way to record as long as motion is detected
-export async function SaveFile(camera: RingCamera, videoCategory: "motion" | "doorbellPressed" | "unknown", duration: number = 30, sendToWebhook: boolean = true)
+export async function record(camera: RingCamera, videoCategory: "motion" | "doorbellPressed" | "unknown", duration: number = 30, sendToWebhook: boolean = true)
 {
   ensurePath(recordingsDir);
 
-  const filename = `${videoCategory}_${formatDateFs(new Date())}.mp4`;
-  const filepath = `${recordingsDir}/${filename}`;
+  const fname = `${videoCategory}_${formatDateFs(new Date())}.mp4`;
+  const filepath = `${recordingsDir}/${fname}`;
 
-  logInfo(`${camera.name} (${camera.id}) Reason: doorbell pressed | recording started (${filepath})`);
+  logInfo(`${camera.name} (${camera.id}) Reason: ${videoCategory}. Recording started (${filepath})`);
 
   logInfo("[RECORDING: START]");
 
@@ -81,6 +78,6 @@ export async function SaveFile(camera: RingCamera, videoCategory: "motion" | "do
 
   if (sendToWebhook)
   {
-    webhookFileWithContext(filename, `${videoCategory} at formatDate(${new Date()}`, process.env.DISCORD_WEBHOOK_URL!);
+    webhookFileWithContext(filepath, `${videoCategory} at ${formatDate(new Date())} UTC+00`, process.env.DISCORD_WEBHOOK_URL!);
   }
 }
