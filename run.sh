@@ -101,6 +101,7 @@ elif [[ $update == 1 ]]; then
   else
   git reset --hard
   git pull
+  npm i
   fi
 else
   git fetch
