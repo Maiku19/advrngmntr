@@ -2,8 +2,7 @@ import { readFile, writeFile } from "fs";
 import { promisify } from "util";
 import { logOnErr, logInfo } from "./logger";
 import { Location, PushNotificationDing, RingCamera } from "ring-client-api";
-import { recordingsDir } from "./consts";
-import { ensurePath, formatDateFs } from "./util";
+import { SaveFile } from "./util";
 
 export async function handleRefreshTokenUpdate(value: { oldRefreshToken?: string | undefined, newRefreshToken: string; }) 
 {
@@ -22,12 +21,8 @@ export async function handleRefreshTokenUpdate(value: { oldRefreshToken?: string
 
 export async function handleLocationConnect(connected: boolean, location: Location) 
 {
-    // I doubt this will ever throw an error, but whatever
-    logOnErr(async () =>
-    {
-        const status = connected ? "Connected to" : "Disconnected from";
-        logInfo(`${status} location ${location.name} (${location.id})`);
-    });
+    const status = connected ? "Connected to" : "Disconnected from";
+    logInfo(`${status} location ${location.name} (${location.id})`);
 }
 
 export async function handleDeviceEvent(device: RingCamera, event: PushNotificationDing) 
@@ -55,16 +50,7 @@ export async function handleOnMotionDetected(camera: RingCamera, value: boolean)
             return;
         }
 
-        ensurePath(recordingsDir);
-
-        const filename = `motion_${formatDateFs(new Date(Date.now()))}.mp4`;
-        const filepath = `${recordingsDir}/${filename}`;
-        logInfo(`${camera.name} (${camera.id}) Reason: motion detected | recording started (${filepath})`);
-
-
-        // TODO: find a way to record as long as motion is detected
-        // TODO: record audio
-        camera.recordToFile(filepath, 30);
+        SaveFile(camera, "motion", 30);
     });
 }
 
@@ -72,19 +58,12 @@ export async function handleOnDoorbellPressed(doorbell: RingCamera, event: PushN
 {
     logOnErr(async () =>
     {
-        logInfo(`\n[DoorbellPress: START]
+        logInfo(`\n[handleOnDoorbellPressed: START]
   EventId: ${event.ding.id}
   DoorbellId: ${doorbell.id}
   DoorbellName: ${doorbell.name}
-[DoorbellPress: END]`);
+[handleOnDoorbellPressed: END]`);
 
-        ensurePath(recordingsDir);
-
-        const filename = `doorbellPressed_${formatDateFs(new Date(Date.now()))}.mp4`;
-        const filepath = `${recordingsDir}/${filename}`;
-        logInfo(`${doorbell.name} (${doorbell.id}) Reason: doorbell pressed | recording started (${filepath})`);
-
-        // TODO: find a way to record as long as motion is detected
-        doorbell.recordToFile(filepath, 120);
+        SaveFile(doorbell, "doorbellPressed", 120);
     });
 }

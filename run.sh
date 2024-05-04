@@ -94,9 +94,14 @@ if [[ $? -ne "0" ]]; then
   exec "$dir/run.sh @$"
   exit 0
 elif [[ $update == 1 ]]; then
-  cp $(basename $0) $TMP/$name
-  exec "$TMP/$name -a $a -d $dir -u"
-  exit 0
+  if [[ "${dir}/${name}" -ef $0 ]]; then
+    cp $0 ${TMP}/${name}
+    ${TMP}/${name} $@
+    exit 0
+  else
+  git reset --hard
+  git pull
+  fi
 else
   git fetch
   echo "if you want to update run: './run.sh -u' or 'git pull'"
