@@ -71,7 +71,7 @@ export async function record(camera: RingCamera, videoCategory: "motion" | "door
 
   logInfo("[RECORDING: START]");
 
-  if (sendToWebhook) { webhookMessage(`Wykryto ${videoCategory}! Rozpoczynanie nagrywania (ETA: ${duration}s)`); }
+  if (sendToWebhook) { webhookMessage(`${camera.name}: Wykryto ${videoCategory}! Rozpoczynanie nagrywania (ETA: ${duration}s)`); }
   await camera.recordToFile(filepath, duration);
 
   logInfo("[RECORDING: END]");

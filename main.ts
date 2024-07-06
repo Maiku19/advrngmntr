@@ -89,7 +89,9 @@ async function promptCmd(ringApi: RingApi, rl?: readline.Interface,)
       input: process.stdin,
       output: process.stdout
     });
-  rl.question("cmd>", async (answer) => { if (await handleCommand(answer, ringApi)) { logInfo("[PROGRAM: END]"); process.exit(0); } promptCmd(ringApi, rl); });
+
+  // will this ever cause a stack overflow? Probably not, but still in the future I'd like a non-recursive version X-X
+  rl.question("cmd>", async (answer) => { if (await handleCommand(answer, ringApi)) { logInfo("Archiving Log"); archiveLog(); logInfo("[PROGRAM: END]"); process.exit(0); } promptCmd(ringApi, rl); });
   // END OF PROGRAM
 }
 

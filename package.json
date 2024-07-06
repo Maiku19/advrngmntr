@@ -1,6 +1,6 @@
 {
     "name": "advrngmntr",
-    "version": "0.4.2-dev",
+    "version": "0.4.3",
     "private": true,
     "dependencies": {
         "discord-webhook-node": "^1.1.8",
