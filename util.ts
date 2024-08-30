@@ -98,8 +98,11 @@ export async function captureImage(camera: RingCamera, category: "motion" | "doo
   logInfo("[IMG: START]");
 
   await camera.recordToFile(filepathTemp, 0.1);
+  logInfo("[REC: COMPLETE]");
+
   Ffmpeg()
     .input(filepathTemp)
+    .takeFrames(1)
     .saveToFile(filepath)
     .on('progress', (progress) =>
     {
@@ -112,17 +115,16 @@ export async function captureImage(camera: RingCamera, category: "motion" | "doo
     {
       logInfo('FFmpeg has finished');
       rmSync(filepathTemp);
+      logInfo("[IMG: END]");
+      if (sendToWebhook)
+      {
+        webhookFile(filepath, process.env.DISCORD_WEBHOOK_URL!);
+      }
     })
     .on('error', (error) =>
     {
       logError(`${error.name}: ${error.message} ${error.stack != null ? `\nat ${error.stack}` : ""}`);
       rmSync(filepathTemp);
+      logInfo("[IMG: ERROR]");
     });
-
-  logInfo("[IMG: END]");
-
-  if (sendToWebhook)
-  {
-    webhookFile(filepath, process.env.DISCORD_WEBHOOK_URL!);
-  }
 }
