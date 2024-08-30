@@ -1,8 +1,10 @@
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, rmSync } from "fs";
 import { Webhook } from "discord-webhook-node";
 import { logError, logInfo, logOnErr } from "./logger";
 import { RingCamera } from "ring-client-api";
 import { recordingsDir } from "./consts";
+import "fluent-ffmpeg"
+import Ffmpeg from "fluent-ffmpeg";
 
 export function formatDate(date: Date): string
 {
@@ -79,5 +81,48 @@ export async function record(camera: RingCamera, videoCategory: "motion" | "door
   if (sendToWebhook)
   {
     webhookFileWithContext(filepath, `${videoCategory} at ${formatDate(new Date())} UTC+00`, process.env.DISCORD_WEBHOOK_URL!);
+  }
+}
+
+export async function captureImage(camera: RingCamera, category: "motion" | "doorbellPressed" | "unknown", sendToWebhook: boolean = true)
+{
+  ensurePath(recordingsDir);
+
+  const fname = `${category}_${formatDateFs(new Date())}.jpg`;
+  const fnameTemp = `TEMP_${formatDateFs(new Date())}.mp4`;
+  const filepath = `${recordingsDir}/${fname}`;
+  const filepathTemp = `${recordingsDir}/${fnameTemp}`;
+
+  logInfo(`${camera.name} (${camera.id}) Reason: ${category}. Snap started (${filepath})`);
+
+  logInfo("[IMG: START]");
+
+  await camera.recordToFile(filepathTemp, 0.1);
+  Ffmpeg()
+    .input(filepathTemp)
+    .saveToFile(filepath)
+    .on('progress', (progress) =>
+    {
+      if (progress.percent)
+      {
+        logInfo(`ffmpeg processing: ${Math.floor(progress.percent)}% done`);
+      }
+    })
+    .on('end', () =>
+    {
+      logInfo('FFmpeg has finished');
+      rmSync(filepathTemp);
+    })
+    .on('error', (error) =>
+    {
+      logError(`${error.name}: ${error.message} ${error.stack != null ? `\nat ${error.stack}` : ""}`);
+      rmSync(filepathTemp);
+    });
+
+  logInfo("[IMG: END]");
+
+  if (sendToWebhook)
+  {
+    webhookFile(filepath, process.env.DISCORD_WEBHOOK_URL!);
   }
 }
