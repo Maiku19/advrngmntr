@@ -58,9 +58,9 @@ export function log(msg: string, logLevel: LogLevel)
 
 function log_internal(msg: string, logLevel: LogLevel)
 {
-  const logOutput = `[${formatDate(new Date())}][${LogLevel[logLevel]}] ${msg}\n`;
+  const logOutput = `[${formatDate(new Date())}][${LogLevel[logLevel]}] ${msg}`;
 
-  fs.appendFileSync(latestLog, logOutput);
+  fs.appendFileSync(latestLog, logOutput + '\n');
 
   // idk if i like this or not
   const logFunction =
