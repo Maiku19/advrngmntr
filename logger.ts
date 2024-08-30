@@ -64,9 +64,9 @@ function log_internal(msg: string, logLevel: LogLevel)
 
   // idk if i like this or not
   const logFunction =
-    logLevel == LogLevel.INFO ? console.log :
-      logLevel == LogLevel.WARNING ? console.warn :
-        console.error;
+    logLevel == LogLevel.INFO ?     console.log :
+    logLevel == LogLevel.WARNING ?  console.warn :
+                                    console.error;
 
   logFunction(logOutput);
 }
