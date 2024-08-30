@@ -149,6 +149,26 @@ async function handleCmd_rec(cmd: string, args: string[], api: RingApi): Promise
 
   return true;
 }
+
+async function handleCmd_cimg(cmd: string, args: string[], api: RingApi): Promise<boolean>
+{
+  const cmdId = "cimg";
+
+  if (cmd != cmdId) { return false; }
+  if (args.length < 1) { logWarning(`cmd ${cmdId} takes in at least 1 argument but ${args.length} were provided`); }
+  if (args.length > 2) { logWarning(`omitting arguments as cmd ${cmdId} takes in 1-2, ${args.length} were provided`); }
+
+  const cams = await api.getCameras();
+  for (const cam of cams)
+  {
+    if (!getFlag("a", "all", args) && cam.id.toString() != args[0]) { continue; }
+    captureImage(cam, "unknown", getFlag("u", "upload-to-webhook", args));
+  }
+
+  return true;
+}
+
+
 // -- cmd arg helper functions --
 
 
