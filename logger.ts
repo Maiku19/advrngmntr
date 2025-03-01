@@ -1,6 +1,6 @@
 import fs, { utimes } from "fs";
 import { latestLog, logDir, oldLogDir } from "./consts";
-import { webhookMessage, ensurePath, formatDate, formatDateFs, webhookMessage_internal } from "./util";
+import { webhookMessage, ensurePath, formatDate, formatDateFs } from "./util";
 
 // probably should've put this in a class instead of making everything a function ¯\_(OwO)_/¯
 
@@ -69,7 +69,7 @@ function log_internal(msg: string, logLevel: LogLevel, sendToWebhook: boolean = 
   {
     if (sendToWebhook && logUrl != null)
     {
-      webhookMessage_internal(logOutput, logUrl);
+      webhookMessage(logOutput, logUrl);
     }
   }
   catch (error)

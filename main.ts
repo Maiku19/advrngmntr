@@ -4,6 +4,8 @@ import { handleDeviceEvent, handleLocationConnect, handleOnDoorbellPressed, hand
 import { logOnFatalErr, init as loggerInit, logInfo, archiveLog } from "./logger";
 import * as readline from "readline";
 import { handleCommand } from "./command-handler";
+import { heartbeatMs } from "./consts";
+import { webhookMessage } from "./util";
 
 // im actually enjoying the TS syntax, considering it's just JS with types :P
 
@@ -91,7 +93,27 @@ async function promptCmd(ringApi: RingApi, rl?: readline.Interface,)
     });
 
   // will this ever cause a stack overflow? Probably not, but still in the future I'd like a non-recursive version X-X
-  rl.question("cmd>", async (answer) => { if (await handleCommand(answer, ringApi)) { logInfo("Archiving Log"); archiveLog(); logInfo("[PROGRAM: END]"); process.exit(0); } promptCmd(ringApi, rl); });
+  rl.question("cmd>", async (answer) =>
+  {
+    if (await handleCommand(answer, ringApi))
+    {
+      logInfo("Archiving Log");
+      archiveLog();
+      logInfo("[PROGRAM: END]");
+      await webhookMessage("Exit invoked, shutting down", process.env.DISCORD_CONSOLE_WEBHOOK_URL!);
+      process.exit(0);
+    }
+    
+    rl.close();
+    promptCmd(ringApi, rl);
+    return;
+  });
+
+  while (true)
+  {
+    await new Promise((resolve) => setTimeout(resolve, heartbeatMs));
+    logInfo("Heartbeat");
+  }
   // END OF PROGRAM
 }
 

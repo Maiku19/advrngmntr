@@ -43,13 +43,6 @@ export async function webhookMessage(msg: string, webhookUrl: string = process.e
   logInfo("[WEBHOOK_MSG_SEND: END]", false);
 }
 
-export async function webhookMessage_internal(msg: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
-{
-  await createWebhook(webhookUrl).send(msg);
-
-  logInfo("[WEBHOOK_FILE_SEND: END]", false);
-}
-
 export async function webhookFile(path: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
 {
   // try catch workaround
