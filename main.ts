@@ -8,7 +8,7 @@ import { handleCommand } from "./command-handler";
 // im actually enjoying the TS syntax, considering it's just JS with types :P
 
 // START OF PROGRAM
-loggerInit();
+loggerInit(process.env.DISCORD_CONSOLE_WEBHOOK_URL!);
 logInfo("[PROGRAM: START]");
 
 try

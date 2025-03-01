@@ -140,10 +140,12 @@ async function handleCmd_rec(cmd: string, args: string[], api: RingApi): Promise
   if (args.length < 1) { logWarning(`cmd ${cmdId} takes in at least 1 argument but ${args.length} were provided`); }
   if (args.length > 1) { logWarning(`omitting arguments as cmd ${cmdId} takes in 1, ${args.length} were provided`); }
 
+  logInfo("Fetching cameras");
   const cams = await api.getCameras();
   for (const cam of cams)
   {
     if (!getFlag("a", "all", args) && cam.id.toString() != args[0]) { continue; }
+    logInfo("Invoking record");
     handleOnMotionDetected(cam, getFlag("u", "upload-to-webhook", args));
   }
 

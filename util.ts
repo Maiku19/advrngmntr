@@ -24,7 +24,7 @@ export function ensurePath(path: string)
 
 function createWebhook(webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!): Webhook
 {
-  logInfo("[WEBHOOK_SEND: START]");
+  logInfo("[WEBHOOK_SEND: START]", false);
   const hook = new Webhook(webhookUrl);
 
   hook.setUsername("Advanced (not) Ring Monitor");
@@ -40,15 +40,37 @@ export async function webhookMessage(msg: string, webhookUrl: string = process.e
     await createWebhook(webhookUrl).send(msg);
   });
 
-  logInfo("[WEBHOOK_MSG_SEND: END]");
+  logInfo("[WEBHOOK_MSG_SEND: END]", false);
+}
+
+export async function webhookMessage_internal(msg: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
+{
+  await createWebhook(webhookUrl).send(msg);
+
+  logInfo("[WEBHOOK_FILE_SEND: END]", false);
 }
 
 export async function webhookFile(path: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
 {
-  logOnErr(async () =>
+  // try catch workaround
+  try 
   {
-    await createWebhook(webhookUrl).sendFile(path);
-  });
+    logOnErr(async () =>
+    {
+      await createWebhook(webhookUrl).sendFile(path);
+    });
+  }
+  catch (error) 
+  {
+    if (error instanceof Error)
+    {
+      logError(`Failed to send file via webhook! Error: ${error.name} at ${error.stack}: ${error.message}`);
+    }
+    else
+    {
+      logError("Failed to send file via webhook!");
+    }
+  }
 
   logInfo("[WEBHOOK_FILE_SEND: END]");
 }
