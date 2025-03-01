@@ -170,3 +170,6 @@ logs/
 recordings/
 
 # End of https://www.toptal.com/developers/gitignore/api/dotenv,visualstudiocode,node
+
+null
+nohup.out
