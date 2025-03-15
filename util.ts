@@ -1,8 +1,10 @@
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, rmSync } from "fs";
 import { Webhook } from "discord-webhook-node";
 import { logError, logInfo, logOnErr } from "./logger";
 import { RingCamera } from "ring-client-api";
 import { recordingsDir } from "./consts";
+import "fluent-ffmpeg"
+import Ffmpeg from "fluent-ffmpeg";
 
 export function formatDate(date: Date): string
 {
@@ -22,7 +24,7 @@ export function ensurePath(path: string)
 
 function createWebhook(webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!): Webhook
 {
-  logInfo("[WEBHOOK_SEND: START]");
+  logInfo("[WEBHOOK_SEND: START]", false);
   const hook = new Webhook(webhookUrl);
 
   hook.setUsername("Advanced (not) Ring Monitor");
@@ -33,20 +35,46 @@ function createWebhook(webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!): W
 
 export async function webhookMessage(msg: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
 {
-  logOnErr(async () =>
+  try 
   {
     await createWebhook(webhookUrl).send(msg);
-  });
+  }
+  catch (error)
+  {
+    if (error instanceof Error)
+    {
+      logError(`Failed to send message via webhook! Error: ${error.name} at ${error.stack}: ${error.message}`);
+      return
+    }
 
-  logInfo("[WEBHOOK_MSG_SEND: END]");
+    logError("Unknown error! Failed to send message via webhook!");
+    return;
+  }
+
+  logInfo("[WEBHOOK_MSG_SEND: END]", false);
 }
 
 export async function webhookFile(path: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
 {
-  logOnErr(async () =>
+  // try catch workaround
+  try 
   {
-    await createWebhook(webhookUrl).sendFile(path);
-  });
+    logOnErr(async () =>
+    {
+      await createWebhook(webhookUrl).sendFile(path);
+    });
+  }
+  catch (error) 
+  {
+    if (error instanceof Error)
+    {
+      logError(`Failed to send file via webhook! Error: ${error.name} at ${error.stack}: ${error.message}`);
+    }
+    else
+    {
+      logError("Failed to send file via webhook!");
+    }
+  }
 
   logInfo("[WEBHOOK_FILE_SEND: END]");
 }
@@ -80,4 +108,49 @@ export async function record(camera: RingCamera, videoCategory: "motion" | "door
   {
     webhookFileWithContext(filepath, `${videoCategory} at ${formatDate(new Date())} UTC+00`, process.env.DISCORD_WEBHOOK_URL!);
   }
+}
+
+export async function captureImage(camera: RingCamera, category: "motion" | "doorbellPressed" | "unknown", sendToWebhook: boolean = true)
+{
+  ensurePath(recordingsDir);
+
+  const fname = `${category}_${formatDateFs(new Date())}.jpg`;
+  const fnameTemp = `TEMP_${formatDateFs(new Date())}.mp4`;
+  const filepath = `${recordingsDir}/${fname}`;
+  const filepathTemp = `${recordingsDir}/${fnameTemp}`;
+
+  logInfo(`${camera.name} (${camera.id}) Reason: ${category}. Snap started (${filepath})`);
+
+  logInfo("[IMG: START]");
+
+  await camera.recordToFile(filepathTemp, 0.1);
+  logInfo("[REC: COMPLETE]");
+
+  Ffmpeg()
+    .input(filepathTemp)
+    .takeFrames(1)
+    .saveToFile(filepath)
+    .on('progress', (progress) =>
+    {
+      if (progress.percent)
+      {
+        logInfo(`ffmpeg processing: ${Math.floor(progress.percent)}% done`);
+      }
+    })
+    .on('end', () =>
+    {
+      logInfo('FFmpeg has finished');
+      rmSync(filepathTemp);
+      logInfo("[IMG: END]");
+      if (sendToWebhook)
+      {
+        webhookFile(filepath, process.env.DISCORD_WEBHOOK_URL!);
+      }
+    })
+    .on('error', (error) =>
+    {
+      logError(`${error.name}: ${error.message} ${error.stack != null ? `\nat ${error.stack}` : ""}`);
+      rmSync(filepathTemp);
+      logInfo("[IMG: ERROR]");
+    });
 }
