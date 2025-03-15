@@ -1,11 +1,12 @@
 import "dotenv/config";
 import { Location, RingApi } from "ring-client-api";
 import { handleDeviceEvent, handleLocationConnect, handleOnDoorbellPressed, handleOnMotionDetected, handleRefreshTokenUpdate } from "./handlers";
-import { logOnFatalErr, init as loggerInit, logInfo, archiveLog } from "./logger";
+import { logOnFatalErr, init as loggerInit, logInfo, archiveLog, logFatalError } from "./logger";
 import * as readline from "readline";
 import { handleCommand } from "./command-handler";
 import { heartbeatMs } from "./consts";
 import { webhookMessage } from "./util";
+import { resolve } from "path";
 
 // im actually enjoying the TS syntax, considering it's just JS with types :P
 
@@ -30,9 +31,12 @@ try
 }
 catch (error)
 {
-  logInfo(`Terminating due to fatal error: ${error}`);
+  logFatalError(`Fatal error: ${error}`);
   archiveLog();
   logInfo("[PROGRAM: TERMINATE]");
+  webhookMessage("@here", process.env.DISCORD_CONSOLE_WEBHOOK_URL!);
+  setTimeout(() => { }, 10000);
+
   process.exit(-1);
 }
 
@@ -103,7 +107,7 @@ async function promptCmd(ringApi: RingApi, rl?: readline.Interface,)
       await webhookMessage("Exit invoked, shutting down", process.env.DISCORD_CONSOLE_WEBHOOK_URL!);
       process.exit(0);
     }
-    
+
     rl.close();
     promptCmd(ringApi, rl);
     return;

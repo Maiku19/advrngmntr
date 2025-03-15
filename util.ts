@@ -35,10 +35,21 @@ function createWebhook(webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!): W
 
 export async function webhookMessage(msg: string, webhookUrl: string = process.env.DISCORD_WEBHOOK_URL!)
 {
-  logOnErr(async () =>
+  try 
   {
     await createWebhook(webhookUrl).send(msg);
-  });
+  }
+  catch (error)
+  {
+    if (error instanceof Error)
+    {
+      logError(`Failed to send message via webhook! Error: ${error.name} at ${error.stack}: ${error.message}`);
+      return
+    }
+
+    logError("Unknown error! Failed to send message via webhook!");
+    return;
+  }
 
   logInfo("[WEBHOOK_MSG_SEND: END]", false);
 }
